@@ -1,0 +1,42 @@
+a# Only v2 (recommended)
+Protocol 2
+# Listen port (the IANA registered port number for ssh is 22)
+Port 2746
+# IPv4 only. Add the Floating IP address of the machine
+#for example
+#ListenAddress 10.10.10.103
+ListenAddress <%= @ipaddress %>
+# Port forwarding
+AllowTcpForwarding no
+GatewayPorts no
+# X11 tunneling options
+X11Forwarding no
+X11DisplayOffset 10
+X11UseLocalhost no
+PrintMotd no
+KeepAlive yes
+# Syslog facility and level
+SyslogFacility auth
+LogLevel debug
+# Authentication configuration
+HostKey /etc/ssh/ssh_host_rsa_key
+HostKey /etc/ssh/ssh_host_dsa_key
+# Length of the server key
+ServerKeyBits 768
+KeyRegenerationInterval 3600
+# Ensure secure permissions on users .ssh directory.
+StrictModes yes
+LoginGraceTime 600
+MaxAuthTries 6
+MaxAuthTriesLog 3
+PermitEmptyPasswords no
+PasswordAuthentication yes
+PAMAuthenticationViaKBDInt yes
+PermitRootLogin no
+# sftp subsystem
+Subsystem       sftp    internal-sftp
+IgnoreRhosts yes
+RhostsAuthentication no
+RhostsRSAAuthentication no
+RSAAuthentication yes
+Banner /etc/issue

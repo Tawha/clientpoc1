@@ -26,7 +26,7 @@ class profile::base (
     svcprop { 'Nameservers':
       fmri     => 'network/dns/client',
       property => 'config/nameserver',
-      value    => '8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220',
+      value    => '"8.8.8.8 8.8.4.4 208.67.222.222 208.67.220.220"',
     }
   }
   else {  #possibly restrict this to just Linux and Solaris 10 and fail otherwise?
@@ -40,8 +40,23 @@ class profile::base (
   }
 
 # This module handles SSH hardening for Linux, Solaris 10 and Solaris 11
-  include ssh
-
+#  include ssh
+  file { '/etc/ssh/sshd_config':
+    ensure  => file,
+    mode    => '0644',
+    content => template('profile/sshd_config.erb'),
+  }
+  if $::kernel == 'SunOS' {
+    $ssh_service = 'ssh'
+  }
+  else {
+    $ssh_service = 'sshd'
+  }
+  service { "$ssh_service":
+    ensure    => running,
+    enable    => true,
+    subscribe => File['/etc/ssh/sshd_config'],
+  }
 # Handle Password Policies
   if $::kernel == 'SunOS' {
     file { '/etc/default/passwd':
@@ -179,7 +194,7 @@ class profile::base (
         notify => Service['auditd'],
       }
       exec { '/usr/sbin/auditconfig -setplugin audit_syslog active p_flags=lo,ex,-fr,fw,fm,+fc,+fd':
-        unless => '/usr/bin/test "`/usr/sbin/auditconfig -getplugin audit_syslog | md5sum`" = "87439b2505340f4a02c3e45ec6ac476c  -"',
+        unless => '/usr/bin/test "`/usr/sbin/auditconfig -getplugin audit_syslog | md5sum`" = "6466475c67aab3ba5738953673b64e88  -"',
         notify => Service['auditd'],
       }
       file { '/var/adm/auditlog':
